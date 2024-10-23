@@ -7,11 +7,11 @@ export class NodeScriptApi {
     @config({ default: 'https://api.nodescript.dev' })
     NODESCRIPT_API_URL!: string;
 
-    getClient(authToken: string): ApiProtocol {
+    getClient(token: string): ApiProtocol {
         return createHttpClient(apiProtocol, {
             baseUrl: this.NODESCRIPT_API_URL,
             headers: {
-                'authorization': `Bearer ${authToken}`,
+                'authorization': `Bearer ${token}`,
             },
         });
     }

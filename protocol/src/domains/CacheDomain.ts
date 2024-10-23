@@ -12,7 +12,7 @@ export interface CacheDomain {
 
     set(req: {
         key: string;
-        value: any;
+        data: any;
         expiresAt?: number;
     }): Promise<{}>;
 
@@ -41,7 +41,7 @@ export const CacheDomain: DomainDef<CacheDomain> = {
             type: 'command',
             params: {
                 key: { type: 'string' },
-                value: { type: 'any' },
+                data: { type: 'any' },
                 expiresAt: {
                     type: 'number',
                     optional: true,

@@ -1,5 +1,4 @@
 import { CacheData } from '@nodescript/cache-protocol';
-import { ServerError } from '@nodescript/errors';
 import { Logger } from '@nodescript/logger';
 import { dep } from 'mesh-ioc';
 
@@ -7,7 +6,6 @@ import { CacheStorage, CacheUsageStats } from './CacheStorage.js';
 import { MongoDb } from './MongoDb.js';
 
 interface MongoCacheData {
-    orgId: string;
     workspaceId: string;
     key: string;
     data: Buffer;
@@ -33,11 +31,6 @@ export class MongoCacheStorage extends CacheStorage {
             workspaceId: 1,
             key: 1,
         }, { unique: true });
-        // For querying limits
-        await this.collection.createIndex({
-            orgId: 1,
-            size: 1,
-        });
         // For TTL expiration
         await this.collection.createIndex({
             expiresAt: 1,
@@ -50,20 +43,19 @@ export class MongoCacheStorage extends CacheStorage {
             workspaceId,
             key,
         });
-        return doc ? this.deserialize(doc) : null;
+        if (!doc) {
+            return null;
+        }
+        const expired = !!doc.expiresAt && doc.expiresAt.valueOf() > Date.now();
+        return expired ? null : this.deserialize(doc);
     }
 
-    async getOrgStats(orgId: string): Promise<CacheUsageStats> {
-        const [doc] = await this.collection.aggregate([
+    async checkCacheUsage(workspaceId: string, key: string): Promise<CacheUsageStats> {
+        const res = await this.collection.aggregate([
             {
                 $match: {
-                    orgId
-                },
-            },
-            {
-                $project: {
-                    orgId: 1,
-                    size: 1,
+                    workspaceId,
+                    key: { $ne: key },
                 },
             },
             {
@@ -74,6 +66,7 @@ export class MongoCacheStorage extends CacheStorage {
                 },
             }
         ]).toArray();
+        const doc = res[0] ?? { count: 0, size: 0 };
         return {
             count: doc.count ?? 0,
             size: doc.size ?? 0,
@@ -81,14 +74,13 @@ export class MongoCacheStorage extends CacheStorage {
     }
 
     async upsertData(
-        orgId: string,
         workspaceId: string,
         key: string,
-        data: string,
+        data: any,
         expiresAt?: number,
     ): Promise<void> {
-        const serializedData = Buffer.from(JSON.stringify(data), 'utf-8');
-        const res = await this.collection.updateOne({
+        const buffer = data instanceof Buffer ? data : Buffer.from(JSON.stringify(data), 'utf-8');
+        await this.collection.updateOne({
             workspaceId,
             key,
         }, {
@@ -96,9 +88,8 @@ export class MongoCacheStorage extends CacheStorage {
                 createdAt: new Date(),
             },
             $set: {
-                orgId,
-                data: serializedData,
-                size: serializedData.byteLength,
+                data: buffer,
+                size: buffer.byteLength,
                 updatedAt: new Date(),
                 expiresAt: expiresAt ? new Date(expiresAt) : null,
             },
@@ -106,9 +97,6 @@ export class MongoCacheStorage extends CacheStorage {
                 generation: 1,
             },
         }, { upsert: true });
-        if (res.upsertedCount !== 1) {
-            throw new ServerError('Failed to add record to cache');
-        }
     }
 
     async deleteData(workspaceId: string, key: string): Promise<void> {

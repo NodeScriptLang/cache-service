@@ -14,10 +14,12 @@ export abstract class CacheStorage {
         key: string,
     ): Promise<CacheData | null>;
 
-    abstract getOrgStats(orgId: string): Promise<CacheUsageStats>;
+    abstract checkCacheUsage(
+        workspaceId: string,
+        key: string,
+    ): Promise<CacheUsageStats>;
 
     abstract upsertData(
-        orgId: string,
         workspaceId: string,
         key: string,
         data: any,
