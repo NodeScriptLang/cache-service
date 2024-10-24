@@ -27,7 +27,7 @@
         "build": "run-s compile",
         "version": "run-s version:*",
         "version:compile": "npm run compile",
-        "postversion": "npm publish --access=public && git push --tags origin main"
+        "postversion": "git push --tags origin main"
     },
     "pre-commit": [
         "lint"
