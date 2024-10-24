@@ -1,4 +1,4 @@
-import { Permission } from '@nodescript/api-proto';
+import { AccountType, Permission } from '@nodescript/api-proto';
 import assert from 'assert';
 
 import { runtime } from './runtime.js';
@@ -7,6 +7,23 @@ describe('Cache.set', () => {
 
     beforeEach(async () => runtime.setupDatabases());
     afterEach(async () => runtime.stopDatabases());
+
+    beforeEach(() => {
+        runtime.nsApiMock.setMockWorkspace({
+            id: 'a-team',
+            owner: {
+                id: 'jane',
+                type: AccountType.USER,
+                displayName: 'Joe',
+                avatarUrl: '',
+            },
+            metadata: {
+                cacheMaxKeys: 10,
+                cacheMaxSize: 10_000,
+                cacheMaxEntrySize: 5_000,
+            }
+        });
+    });
 
     context('authorized', () => {
 
@@ -54,7 +71,6 @@ describe('Cache.set', () => {
         context('keys limit reached', () => {
 
             beforeEach(async () => {
-                // See .env.test
                 for (let i = 0; i < 10; i++) {
                     await runtime.cacheStorage.upsertData('a-team', `foo${i}`, '123');
                 }
@@ -80,7 +96,7 @@ describe('Cache.set', () => {
                 await runtime.cacheStorage.upsertData(
                     'a-team',
                     'test1',
-                    generatePayload(10_000), // See .env.test
+                    generatePayload(10_000),
                 );
             });
 

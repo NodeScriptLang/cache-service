@@ -9,6 +9,8 @@ import { MongoDb } from '../main/global/MongoDb.js';
 import { HttpScope } from '../main/HttpScope.js';
 import { AuthContext } from '../main/scoped/AuthContext.js';
 import { CacheProtocolImpl } from '../main/scoped/CacheProtocolImpl.js';
+import { NodeScriptApi } from '../main/scoped/NodeScriptApi.js';
+import { NodeScriptApiMock } from './mocks/NodeScriptApiMock.js';
 
 config({ path: '.env' });
 config({ path: '.env.test' });
@@ -21,6 +23,7 @@ export class TestRuntime {
     @dep({ cache: false }) cacheStorage!: CacheStorage;
     @dep({ cache: false }) jwt!: JwtService;
     @dep({ cache: false }) mongodb!: MongoDb;
+    @dep({ cache: false }) nsApiMock!: NodeScriptApiMock;
 
     app = new App();
     httpScope = new HttpScope(this.app.mesh);
@@ -30,6 +33,8 @@ export class TestRuntime {
         this.httpScope = new HttpScope(this.app.mesh);
         // Allow resolving deps directly from the session scope
         this.httpScope.connect(this);
+        this.httpScope.service(NodeScriptApiMock);
+        this.httpScope.alias(NodeScriptApi, NodeScriptApiMock);
         await this.app.start();
     }
 
