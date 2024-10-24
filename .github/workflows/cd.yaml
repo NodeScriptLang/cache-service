@@ -1,0 +1,28 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    uses: NodeScriptLang/github-actions/.github/workflows/ci-build.yaml@main
+    with:
+      image: europe-west1-docker.pkg.dev/nodescript-production/nodescript-image-registry/nodescript-cache-service
+      file: Dockerfile
+    secrets:
+      REGISTRY_SECRET: ${{ secrets.GCP_REGISTRY_ACCESS }}
+
+  deploy-production:
+    needs: build
+    uses: NodeScriptLang/github-actions/.github/workflows/ci-deploy.yaml@main
+    with:
+      gh_user: NodeScriptLang
+      gh_repo: infrastructure
+      image_name: nodescript-cache-service
+      env_name: production
+      app_path: apps/cache-groups
+      auto_merge: true
+    secrets:
+      ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
