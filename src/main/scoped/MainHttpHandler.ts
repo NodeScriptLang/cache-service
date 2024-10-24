@@ -1,4 +1,4 @@
-import { HttpChain, HttpContext, HttpErrorHandler, HttpHandler, HttpNext } from '@nodescript/http-server';
+import { HttpChain, HttpContext, HttpCorsHandler, HttpErrorHandler, HttpHandler, HttpNext } from '@nodescript/http-server';
 import { dep } from 'mesh-ioc';
 
 import { CacheProtocolHandler } from './CacheProtocolHandler.js';
@@ -9,10 +9,12 @@ export class MainHttpHandler implements HttpHandler {
     @dep() private errorHandler!: HttpErrorHandler;
     @dep() private authHandler!: HttpAuthHandler;
     @dep() private cacheProtocolHandler!: CacheProtocolHandler;
+    @dep() private corsHandler!: HttpCorsHandler;
 
     private handler = new HttpChain([
         this.errorHandler,
         this.authHandler,
+        this.corsHandler,
         this.cacheProtocolHandler,
     ]);
 

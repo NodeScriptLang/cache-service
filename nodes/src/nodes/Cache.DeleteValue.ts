@@ -12,8 +12,8 @@ type R = Promise<unknown>;
 
 export const module: ModuleDefinition<P, R> = {
     version: '1.0.1',
-    moduleName: 'Cache / Get Value',
-    description: 'Returns data from Cache or null if it does not exist.',
+    moduleName: 'Cache / Delete Value',
+    description: 'Removes data from Cache.',
     keywords: ['lookup'],
     params: {
         accessToken: {
@@ -47,6 +47,6 @@ export const compute: ModuleCompute<P, R> = async (params, ctx) => {
             authorization: `Bearer ${accessToken}`
         }
     });
-    const { data } = await client.Cache.lookup({ key: cacheKey });
-    return data;
+    const res = await client.Cache.delete({ key: cacheKey });
+    return res;
 };
