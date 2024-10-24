@@ -48,7 +48,7 @@ jobs:
     with:
       gh_user: NodeScriptLang
       gh_repo: infrastructure
-      image_name: nodescript-cache-service
+      image_name: cache-service
       env_name: production
       app_path: apps/cache-service
       auto_merge: true
