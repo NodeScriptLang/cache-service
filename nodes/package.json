@@ -1,0 +1,9 @@
+{
+    "name": "@nodescript/cache-service-nodes",
+    "version": "1.0.1",
+    "description": "Cache Nodes",
+    "private": true,
+    "type": "module",
+    "author": "NodeScript",
+    "license": "ISC"
+}

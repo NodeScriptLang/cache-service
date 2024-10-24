@@ -14,7 +14,8 @@
         "out/bin/**/*"
     ],
     "workspaces": [
-        "./protocol"
+        "./protocol",
+        ".nodes"
     ],
     "scripts": {
         "clean": "rm -rf out *.tsbuildinfo",
@@ -27,7 +28,9 @@
         "build": "run-s compile",
         "version": "run-s version:*",
         "version:compile": "npm run compile",
-        "postversion": "git push --tags origin main"
+        "version:workspaces": "npm exec --workspaces -- npm version $npm_package_version && git add .",
+        "postversion": "git push --tags origin main",
+        "publish:nodes": "cd nodes && nodescript publish"
     },
     "pre-commit": [
         "lint"
@@ -40,6 +43,7 @@
     "author": "Boris Okunskiy",
     "license": "ISC",
     "devDependencies": {
+        "@nodescript/cli": "^1.9.0",
         "@nodescript/eslint-config": "^2.0.1",
         "@types/mocha": "^8.2.3",
         "@types/node": "^18.19.23",

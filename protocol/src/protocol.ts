@@ -6,6 +6,6 @@ export interface CacheProtocol {
     Cache: CacheDomain;
 }
 
-export const mongoProtocol = new ProtocolIndex<CacheProtocol>({
+export const cacheProtocol = new ProtocolIndex<CacheProtocol>({
     Cache: CacheDomain,
 });

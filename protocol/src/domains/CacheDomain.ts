@@ -23,7 +23,7 @@ export interface CacheDomain {
 }
 
 export const CacheDomain: DomainDef<CacheDomain> = {
-    name: 'Mongo',
+    name: 'Cache',
     methods: {
         lookup: {
             type: 'query',

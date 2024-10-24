@@ -1,0 +1,3 @@
+modules:
+  - pattern: src/nodes/**/*.ts
+    sourceUrl: https://github.com/NodeScriptLang/cache-service/blob/main/nodes/{file}

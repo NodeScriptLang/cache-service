@@ -1,4 +1,4 @@
-import { CacheProtocol, mongoProtocol } from '@nodescript/cache-protocol';
+import { CacheProtocol, cacheProtocol } from '@nodescript/cache-protocol';
 import { HttpProtocolHandler } from '@nodescript/http-server';
 import { dep } from 'mesh-ioc';
 
@@ -10,7 +10,7 @@ export class CacheProtocolHandler extends HttpProtocolHandler<CacheProtocol> {
     @dep() protocolImpl!: CacheProtocolImpl;
     @dep() metrics!: Metrics;
 
-    protocol = mongoProtocol;
+    protocol = cacheProtocol;
 
     constructor() {
         super();
