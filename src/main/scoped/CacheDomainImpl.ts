@@ -20,8 +20,11 @@ export class CacheDomainImpl implements CacheDomain {
     @config({ default: 1_000_000 })
     private CACHE_MAX_ENTRY_SIZE!: number;
 
-    @config({ default: 6_000 })
-    private CACHE_RATE_LIMIT_PER_MIN!: number;
+    @config({ default: 200 })
+    private CACHE_RATE_LIMIT!: number;
+
+    @config({ default: 5 })
+    private CACHE_RATE_LIMIT_WINDOW!: number;
 
     @dep() private authContext!: AuthContext;
     @dep() private cacheStorage!: CacheStorage;
@@ -84,13 +87,11 @@ export class CacheDomainImpl implements CacheDomain {
     }
 
     private async getRateLimit(workspaceId: string): Promise<{ limit: number; remaining: number }> {
-        const limit = this.CACHE_RATE_LIMIT_PER_MIN;
-        const d = new Date();
-        const date = d.toISOString().split('T')[0];
-        const [hh, mm] = d.toISOString().split('T')[1].split(':');
-        const key = `Cache:rateLimit:${workspaceId}:${date}:${hh}:${mm}`;
+        const window = Math.round(Date.now() / this.CACHE_RATE_LIMIT_WINDOW / 1000);
+        const limit = this.CACHE_RATE_LIMIT * this.CACHE_RATE_LIMIT_WINDOW;
+        const key = `Cache:rateLimit:${workspaceId}:${window}`;
         const requestCount = await this.redis.client.incr(key);
-        await this.redis.client.expire(key, 1 * 60); // 1 min expiration
+        await this.redis.client.expire(key, this.CACHE_RATE_LIMIT_WINDOW * 2);
         const remaining = Math.max(limit - requestCount, 0);
         return { limit, remaining };
     }
