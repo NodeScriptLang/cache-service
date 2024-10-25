@@ -46,7 +46,7 @@ export class MongoCacheStorage extends CacheStorage {
         if (!doc) {
             return null;
         }
-        const expired = !!doc.expiresAt && doc.expiresAt.valueOf() > Date.now();
+        const expired = !!doc.expiresAt && Date.now() > doc.expiresAt.valueOf();
         return expired ? null : this.deserialize(doc);
     }
 
