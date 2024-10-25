@@ -9,8 +9,8 @@ describe('Cache.lookup', () => {
     afterEach(async () => runtime.stopDatabases());
 
     beforeEach(async () => {
-        await runtime.cacheStorage.upsertData('a-team', 'test1', 'Hello A');
-        await runtime.cacheStorage.upsertData('b-team', 'test2', 'Hello B');
+        await runtime.cacheStorage.upsertData('a-team', 'test1', 'Hello A', Date.now() + 60_000);
+        await runtime.cacheStorage.upsertData('b-team', 'test2', 'Hello B', Date.now() + 60_000);
     });
 
     context('authorized', () => {

@@ -34,8 +34,8 @@ describe('Cache.set', () => {
         context('limits not reached', () => {
 
             beforeEach(async () => {
-                await runtime.cacheStorage.upsertData('a-team', 'test1', 'Hello A');
-                await runtime.cacheStorage.upsertData('b-team', 'test2', 'Hello B');
+                await runtime.cacheStorage.upsertData('a-team', 'test1', 'Hello A', Date.now() + 60_000);
+                await runtime.cacheStorage.upsertData('b-team', 'test2', 'Hello B', Date.now() + 60_000);
             });
 
             it('stores the record', async () => {
@@ -72,7 +72,7 @@ describe('Cache.set', () => {
 
             beforeEach(async () => {
                 for (let i = 0; i < 10; i++) {
-                    await runtime.cacheStorage.upsertData('a-team', `foo${i}`, '123');
+                    await runtime.cacheStorage.upsertData('a-team', `foo${i}`, '123', Date.now() + 60_000);
                 }
             });
 
@@ -97,6 +97,7 @@ describe('Cache.set', () => {
                     'a-team',
                     'test1',
                     generatePayload(10_000),
+                    Date.now() + 60_000
                 );
             });
 

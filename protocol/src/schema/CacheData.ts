@@ -9,7 +9,7 @@ export interface CacheData {
     generation: number;
     createdAt: number;
     updatedAt: number;
-    expiresAt: number | null;
+    expiresAt: number;
 }
 
 export const CacheDataSchema = new Schema<CacheData>({
@@ -21,9 +21,6 @@ export const CacheDataSchema = new Schema<CacheData>({
         generation: { type: 'number' },
         createdAt: { type: 'number' },
         updatedAt: { type: 'number' },
-        expiresAt: {
-            type: 'number',
-            nullable: true,
-        },
+        expiresAt: { type: 'number' },
     }
 });

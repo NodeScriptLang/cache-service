@@ -13,7 +13,7 @@ interface MongoCacheData {
     generation: number;
     createdAt: Date;
     updatedAt: Date;
-    expiresAt: Date | null;
+    expiresAt: Date;
 }
 
 export class MongoCacheStorage extends CacheStorage {
@@ -77,7 +77,7 @@ export class MongoCacheStorage extends CacheStorage {
         workspaceId: string,
         key: string,
         data: any,
-        expiresAt?: number,
+        expiresAt: number,
     ): Promise<void> {
         const buffer = data instanceof Buffer ? data : Buffer.from(JSON.stringify(data), 'utf-8');
         await this.collection.updateOne({
@@ -91,7 +91,7 @@ export class MongoCacheStorage extends CacheStorage {
                 data: buffer,
                 size: buffer.byteLength,
                 updatedAt: new Date(),
-                expiresAt: expiresAt ? new Date(expiresAt) : null,
+                expiresAt: new Date(expiresAt),
             },
             $inc: {
                 generation: 1,
@@ -114,7 +114,7 @@ export class MongoCacheStorage extends CacheStorage {
             generation: doc.generation,
             createdAt: doc.createdAt.valueOf(),
             updatedAt: doc.updatedAt.valueOf(),
-            expiresAt: doc.expiresAt?.valueOf() ?? null,
+            expiresAt: doc.expiresAt.valueOf(),
         };
     }
 

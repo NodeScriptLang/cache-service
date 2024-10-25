@@ -26,6 +26,9 @@ export class CacheDomainImpl implements CacheDomain {
     @config({ default: 5 })
     private CACHE_RATE_LIMIT_WINDOW!: number;
 
+    @config({ default: 180 * 24 * 60 * 60 * 1000 })
+    private CACHE_MAX_RETENTION_MS!: number;
+
     @dep() private authContext!: AuthContext;
     @dep() private cacheStorage!: CacheStorage;
     @dep() private nsApi!: NodeScriptApi;
@@ -54,6 +57,7 @@ export class CacheDomainImpl implements CacheDomain {
         const maxSize = Number(workspace.metadata.cacheMaxSize) || this.CACHE_MAX_SIZE;
         const maxEntrySize = Number(workspace.metadata.cacheMaxEntrySize) || this.CACHE_MAX_ENTRY_SIZE;
         const usage = await this.cacheStorage.checkCacheUsage(token.workspaceId, req.key);
+        const expiresAt = this.evalExpirationTime(req.expiresAt);
         if ((usage.count + 1) > maxKeys) {
             throw new AccessDeniedError('Maximum number of keys in cache reached');
         }
@@ -64,7 +68,7 @@ export class CacheDomainImpl implements CacheDomain {
         if (buffer.byteLength > maxEntrySize) {
             throw new AccessDeniedError(`Entry cannot exceed ${maxEntrySize} bytes`);
         }
-        await this.cacheStorage.upsertData(token.workspaceId, req.key, buffer, req.expiresAt);
+        await this.cacheStorage.upsertData(token.workspaceId, req.key, buffer, expiresAt);
         return {};
     }
 
@@ -94,6 +98,11 @@ export class CacheDomainImpl implements CacheDomain {
         await this.redis.client.expire(key, this.CACHE_RATE_LIMIT_WINDOW * 2);
         const remaining = Math.max(limit - requestCount, 0);
         return { limit, remaining };
+    }
+
+    private evalExpirationTime(expiresAt?: number | null) {
+        const maxExpiresAt = Date.now() + this.CACHE_MAX_RETENTION_MS;
+        return expiresAt == null ? maxExpiresAt : Math.min(expiresAt, maxExpiresAt);
     }
 
 }

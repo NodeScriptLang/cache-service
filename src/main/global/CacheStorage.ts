@@ -23,7 +23,7 @@ export abstract class CacheStorage {
         workspaceId: string,
         key: string,
         data: any,
-        expiresAt?: number,
+        expiresAt: number,
     ): Promise<void>;
 
     abstract deleteData(
