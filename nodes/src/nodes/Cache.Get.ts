@@ -11,8 +11,8 @@ interface P {
 type R = Promise<unknown>;
 
 export const module: ModuleDefinition<P, R> = {
-    version: '1.0.1',
-    moduleName: 'Cache / Get Value',
+    version: '1.0.2',
+    moduleName: 'Cache / Get',
     description: 'Returns data from Cache or null if it does not exist.',
     keywords: ['lookup'],
     params: {

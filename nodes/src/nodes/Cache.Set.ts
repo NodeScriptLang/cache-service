@@ -14,8 +14,8 @@ interface P {
 type R = Promise<unknown>;
 
 export const module: ModuleDefinition<P, R> = {
-    version: '1.0.1',
-    moduleName: 'Cache / Set Value',
+    version: '1.0.2',
+    moduleName: 'Cache / Set',
     description: 'Puts data into cache, optionally with expiry date.',
     keywords: ['update'],
     params: {

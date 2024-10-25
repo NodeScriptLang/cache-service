@@ -11,10 +11,10 @@ interface P {
 type R = Promise<unknown>;
 
 export const module: ModuleDefinition<P, R> = {
-    version: '1.0.1',
-    moduleName: 'Cache / Delete Value',
+    version: '1.0.2',
+    moduleName: 'Cache / Delete',
     description: 'Removes data from Cache.',
-    keywords: ['lookup'],
+    keywords: ['remove'],
     params: {
         accessToken: {
             schema: {
