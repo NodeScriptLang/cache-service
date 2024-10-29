@@ -1,6 +1,6 @@
 import { Permission } from '@nodescript/api-proto';
 import { CacheData, CacheDomain } from '@nodescript/cache-protocol';
-import { AccessDeniedError, RateLimitExceededError } from '@nodescript/errors';
+import { AccessDeniedError } from '@nodescript/errors';
 import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
@@ -14,17 +14,20 @@ export class CacheDomainImpl implements CacheDomain {
     @config({ default: 100_000 })
     private CACHE_MAX_KEYS!: number;
 
-    @config({ default: 100_000_000 })
+    @config({ default: 50_000_000 })
     private CACHE_MAX_SIZE!: number;
 
-    @config({ default: 1_000_000 })
+    @config({ default: 500_000 })
     private CACHE_MAX_ENTRY_SIZE!: number;
 
-    @config({ default: 200 })
+    @config({ default: 100 })
     private CACHE_RATE_LIMIT!: number;
 
     @config({ default: 5 })
-    private CACHE_RATE_LIMIT_WINDOW!: number;
+    private CACHE_RATE_LIMIT_WINDOW_SECONDS!: number;
+
+    @config({ default: 200 })
+    private CACHE_RATE_LIMIT_SLOWDOWN_MS!: number;
 
     @config({ default: 180 * 24 * 60 * 60 * 1000 })
     private CACHE_MAX_RETENTION_MS!: number;
@@ -86,16 +89,18 @@ export class CacheDomainImpl implements CacheDomain {
     private async checkRateLimit(workspaceId: string) {
         const { remaining } = await this.getRateLimit(workspaceId);
         if (remaining <= 0) {
-            throw new RateLimitExceededError();
+            // Experimental: add slowdown instead of throwing errors
+            await new Promise(r => setTimeout(r, this.CACHE_RATE_LIMIT_SLOWDOWN_MS));
+            // throw new RateLimitExceededError();
         }
     }
 
     private async getRateLimit(workspaceId: string): Promise<{ limit: number; remaining: number }> {
-        const window = Math.round(Date.now() / this.CACHE_RATE_LIMIT_WINDOW / 1000);
-        const limit = this.CACHE_RATE_LIMIT * this.CACHE_RATE_LIMIT_WINDOW;
+        const window = Math.round(Date.now() / this.CACHE_RATE_LIMIT_WINDOW_SECONDS / 1000);
+        const limit = this.CACHE_RATE_LIMIT * this.CACHE_RATE_LIMIT_WINDOW_SECONDS;
         const key = `Cache:rateLimit:${workspaceId}:${window}`;
         const requestCount = await this.redis.client.incr(key);
-        await this.redis.client.expire(key, this.CACHE_RATE_LIMIT_WINDOW * 2);
+        await this.redis.client.expire(key, this.CACHE_RATE_LIMIT_WINDOW_SECONDS * 2);
         const remaining = Math.max(limit - requestCount, 0);
         return { limit, remaining };
     }
