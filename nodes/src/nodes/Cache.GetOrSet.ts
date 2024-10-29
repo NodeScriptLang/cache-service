@@ -86,7 +86,7 @@ export const compute: ModuleCompute<P, R> = async (params, ctx) => {
                 Date.now() + params.ttl :
                 undefined;
     const data = await ctx.resolveDeferred(params.data);
-    const res = await client.Cache.set({
+    await client.Cache.set({
         key: cacheKey,
         data,
         expiresAt,
