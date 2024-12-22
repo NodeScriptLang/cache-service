@@ -60,18 +60,18 @@
         "@nodescript/core": "^7.21.3",
         "@nodescript/errors": "^1.2.0",
         "@nodescript/fetch-undici": "^1.4.0",
-        "@nodescript/http-server": "^2.8.0",
+        "@nodescript/http-server": "^2.9.0",
         "@nodescript/logger": "^2.0.6",
-        "@nodescript/metrics": "^1.5.0",
-        "@nodescript/microframework": "^1.14.0",
+        "@nodescript/metrics": "^1.7.0",
+        "@nodescript/microframework": "^1.15.0",
         "@nodescript/protocomm": "^1.1.0",
         "@types/jsonwebtoken": "^9.0.7",
         "airtight": "^5.7.2",
         "ioredis": "^5.4.1",
         "jsonwebtoken": "^9.0.2",
         "lru-cache": "^11.0.2",
-        "mesh-config": "^1.1.2",
-        "mesh-ioc": "^3.3.1",
+        "mesh-config": "^1.2.0",
+        "mesh-ioc": "^4.0.1",
         "mongodb": "^6.10.0"
     }
 }
