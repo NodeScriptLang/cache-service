@@ -1,6 +1,6 @@
 {
     "name": "@nodescript/cache-protocol",
-    "version": "1.11.1",
+    "version": "1.11.2",
     "description": "Cache Protocol",
     "type": "module",
     "sideEffects": false,
