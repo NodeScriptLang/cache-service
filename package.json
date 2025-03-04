@@ -1,6 +1,6 @@
 {
     "name": "@nodescript/cache-service",
-    "version": "1.11.3",
+    "version": "1.11.4",
     "description": "NodeScript Cache Service",
     "type": "module",
     "sideEffects": false,
