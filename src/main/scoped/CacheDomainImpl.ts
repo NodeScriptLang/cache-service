@@ -4,6 +4,7 @@ import { AccessDeniedError } from '@nodescript/errors';
 import { config } from 'mesh-config';
 import { dep } from 'mesh-ioc';
 
+import { CacheStatsStorage } from '../global/CacheStatsStorage.js';
 import { CacheStorage } from '../global/CacheStorage.js';
 import { RedisManager } from '../global/RedisManager.js';
 import { AuthContext } from './AuthContext.js';
@@ -34,6 +35,7 @@ export class CacheDomainImpl implements CacheDomain {
 
     @dep() private authContext!: AuthContext;
     @dep() private cacheStorage!: CacheStorage;
+    @dep() private cacheStatsStorage!: CacheStatsStorage;
     @dep() private nsApi!: NodeScriptApi;
     @dep() private redis!: RedisManager;
 
@@ -59,18 +61,32 @@ export class CacheDomainImpl implements CacheDomain {
         const maxKeys = Number(workspace.metadata.cacheMaxKeys) || this.CACHE_MAX_KEYS;
         const maxSize = Number(workspace.metadata.cacheMaxSize) || this.CACHE_MAX_SIZE;
         const maxEntrySize = Number(workspace.metadata.cacheMaxEntrySize) || this.CACHE_MAX_ENTRY_SIZE;
-        const usage = await this.cacheStorage.checkCacheUsage(token.workspaceId, req.key);
-        const expiresAt = this.evalExpirationTime(req.expiresAt);
-        if ((usage.count + 1) > maxKeys) {
+        // Note: since we store aggregated stats, we need to also fetch data to understand how to update the stats
+        const data = await this.cacheStorage.getData(token.workspaceId, req.key);
+        const isNew = data == null;
+        const stats = await this.cacheStatsStorage.getStats(token.workspaceId);
+        // Max keys check
+        if (isNew && (stats.count + 1) > maxKeys) {
             throw new AccessDeniedError('Maximum number of keys in cache reached');
         }
+        // Max size check
         const buffer = Buffer.from(JSON.stringify(req.data), 'utf-8');
-        if ((usage.size + buffer.byteLength) > maxSize) {
-            throw new AccessDeniedError('Maximum size of data in cache reached');
-        }
-        if (buffer.byteLength > maxEntrySize) {
+        const oldSize = isNew ? 0 : data.size;
+        const newSize = buffer.byteLength;
+        if (newSize > maxEntrySize) {
             throw new AccessDeniedError(`Entry cannot exceed ${maxEntrySize} bytes`);
         }
+        const sizeDelta = newSize - oldSize;
+        if ((stats.size + sizeDelta) > maxSize) {
+            throw new AccessDeniedError('Maximum size of data in cache reached');
+        }
+        // Update stats
+        // Note: we're not super accurate here (esp. around race conditions),
+        // we just need to have some rough limits to prevent abuse.
+        // The exact stats are re-calculated periodically to remove accumulated inaccuracies.
+        await this.cacheStatsStorage.incrUsage(token.workspaceId, isNew ? 1 : 0, sizeDelta);
+        // Write data
+        const expiresAt = this.evalExpirationTime(req.expiresAt);
         await this.cacheStorage.upsertData(token.workspaceId, req.key, buffer, expiresAt);
         return {};
     }

@@ -13,7 +13,7 @@ export class NodeScriptApi {
     @config({ default: 100_000 })
     WORKSPACE_CACHE_MAX_COUNT!: number;
 
-    @config({ default: 5_000 })
+    @config({ default: 60_000 })
     WORKSPACE_CACHE_TTL!: number;
 
     @dep() private ctx!: HttpContext;
