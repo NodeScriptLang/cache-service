@@ -53,6 +53,8 @@ export class MongoCacheStatsStorage extends CacheStatsStorage {
         }, {
             $inc: { count, size },
             $set: { lastUpdatedAt: new Date() },
+        }, {
+            upsert: true,
         });
     }
 
@@ -65,6 +67,8 @@ export class MongoCacheStatsStorage extends CacheStatsStorage {
                 size,
                 lastUpdatedAt: new Date(),
             },
+        }, {
+            upsert: true,
         });
     }
 

@@ -10,6 +10,9 @@ export class StatsUpdater {
     @config({ default: 60_000 })
     private STATS_UPDATER_INTERVAL_MS!: number;
 
+    @config({ default: true })
+    private STATS_UPDATER_ENABLED!: boolean;
+
     @dep() private logger!: Logger;
     @dep() private cacheStatsStorage!: CacheStatsStorage;
     @dep() private cacheStorage!: CacheStorage;
@@ -18,6 +21,9 @@ export class StatsUpdater {
     private runPromise: Promise<void> | null = null;
 
     async start() {
+        if (!this.STATS_UPDATER_ENABLED) {
+            return;
+        }
         if (this.running) {
             return;
         }

@@ -98,7 +98,11 @@ export class CacheDomainImpl implements CacheDomain {
         }
         await this.checkRateLimit(token.workspaceId);
         this.authContext.requirePermissions([Permission.WORKSPACE_CACHE_WRITE]);
-        this.cacheStorage.deleteData(token.workspaceId, req.key);
+        const data = await this.cacheStorage.getData(token.workspaceId, req.key);
+        await this.cacheStorage.deleteData(token.workspaceId, req.key);
+        if (data) {
+            await this.cacheStatsStorage.incrUsage(token.workspaceId, -1, -data.size);
+        }
         return {};
     }
 
