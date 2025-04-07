@@ -14,9 +14,8 @@ export abstract class CacheStorage {
         key: string,
     ): Promise<CacheData | null>;
 
-    abstract checkCacheUsage(
+    abstract calcUsage(
         workspaceId: string,
-        key: string,
     ): Promise<CacheUsageStats>;
 
     abstract upsertData(

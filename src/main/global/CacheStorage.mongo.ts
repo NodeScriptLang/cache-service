@@ -50,12 +50,11 @@ export class MongoCacheStorage extends CacheStorage {
         return expired ? null : this.deserialize(doc);
     }
 
-    async checkCacheUsage(workspaceId: string, key: string): Promise<CacheUsageStats> {
+    async calcUsage(workspaceId: string): Promise<CacheUsageStats> {
         const res = await this.collection.aggregate([
             {
                 $match: {
                     workspaceId,
-                    key: { $ne: key },
                 },
             },
             {

@@ -72,7 +72,10 @@ describe('Cache.set', () => {
 
             beforeEach(async () => {
                 for (let i = 0; i < 10; i++) {
-                    await runtime.cacheStorage.upsertData('a-team', `foo${i}`, '123', Date.now() + 60_000);
+                    await runtime.api.Cache.set({
+                        data: '123',
+                        key: `foo${i}`,
+                    });
                 }
             });
 
@@ -93,12 +96,12 @@ describe('Cache.set', () => {
         context('size limit reached', () => {
 
             beforeEach(async () => {
-                await runtime.cacheStorage.upsertData(
-                    'a-team',
-                    'test1',
-                    generatePayload(10_000),
-                    Date.now() + 60_000
-                );
+                for (let i = 0; i < 2; i++) {
+                    await runtime.api.Cache.set({
+                        key: `test${i}`,
+                        data: generatePayload(4998),
+                    });
+                }
             });
 
             it('throws AccessDeniedError', async () => {
@@ -121,7 +124,7 @@ describe('Cache.set', () => {
                 try {
                     await runtime.api.Cache.set({
                         key: 'foo',
-                        data: generatePayload(5000), // See .env.test
+                        data: generatePayload(5000),
                     });
                     throw new Error('UnexpectedSuccess');
                 } catch (error: any) {
@@ -153,5 +156,5 @@ describe('Cache.set', () => {
 });
 
 function generatePayload(size: number) {
-    return [...Array(size).keys()];
+    return Buffer.alloc(size, 'x').toString('utf-8');
 }
