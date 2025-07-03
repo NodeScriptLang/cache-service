@@ -30,8 +30,11 @@ export class CacheDomainImpl implements CacheDomain {
     @config({ default: 200 })
     private CACHE_RATE_LIMIT_SLOWDOWN_MS!: number;
 
-    @config({ default: 180 * 24 * 60 * 60 * 1000 })
-    private CACHE_MAX_RETENTION_MS!: number;
+    @config({ default: 180 * 24 * 60 * 60 * 1000 }) // ~ 0.5 years
+    private CACHE_TTL_DEFAULT!: number;
+
+    @config({ default: 1800 * 24 * 60 * 60 * 1000 }) // ~ 5 years
+    private CACHE_TTL_MAX!: number;
 
     @dep() private authContext!: AuthContext;
     @dep() private cacheStorage!: CacheStorage;
@@ -126,8 +129,9 @@ export class CacheDomainImpl implements CacheDomain {
     }
 
     private evalExpirationTime(expiresAt?: number | null) {
-        const maxExpiresAt = Date.now() + this.CACHE_MAX_RETENTION_MS;
-        return expiresAt == null ? maxExpiresAt : Math.min(expiresAt, maxExpiresAt);
+        const maxExpiresAt = Date.now() + this.CACHE_TTL_MAX;
+        const defaultExpiresAt = Date.now() + this.CACHE_TTL_DEFAULT;
+        return expiresAt == null ? defaultExpiresAt : Math.min(expiresAt, maxExpiresAt);
     }
 
 }
